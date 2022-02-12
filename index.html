@@ -30,19 +30,7 @@
             { boundKey: "C", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 9" }
         ];
 
-        class Display extends React.Component {
-            constructor(props) {
-                super(props);
-            }
-
-            render() {
-                return (
-                    <p>Display</p>
-                )
-            }
-        }
-
-        class DisplayContainer extends React.Component {
+        class InformationDisplay extends React.Component {
             constructor(props) {
                 super(props);
             }
@@ -50,30 +38,31 @@
             render() {
                 return (
                     <div id="display">
-                        <Display />
+                        <p>{this.props.text}</p>
                     </div>
                 )
             }
         }
+        InformationDisplay.defaultProps = {
+            name: 'Information Display Text'
+        };
 
         class DrumPad extends React.Component {
             constructor(props) {
                 super(props);
-                this.handleDrumPadActivation = this.handleDrumPadActivation.bind(this);
+
+                this.activate = this.activate.bind(this);
             }
 
-            handleDrumPadActivation = (e) => {
-                document.getElementById(this.props.boundKey).play();
-            }
-
-            componentDidMount = () => {
-
-            }
+            activate = (e) => {
+                this.props.handleDrumPadActivation(this.props.boundKey);
+            };
 
             // standardize the width and height
             style = {
                 width: "2em",
-                height: "2em"
+                height: "2em",
+                fontSize: "24px"
             }
 
             render() {
@@ -83,7 +72,7 @@
                             className="drum-pad"
                             id={this.props.id}
                             style={this.style}
-                            onClick={this.handleDrumPadActivation}>
+                            onClick={this.activate}>
                             {this.props.boundKey}
 
                             <audio
@@ -99,37 +88,49 @@
             }
         }
 
-        class DrumPadContainer extends React.Component {
+        class DrumKitContainer extends React.Component {
             constructor(props) {
                 super(props);
+
+                this.state = {
+                    displayDrumInformation: 'Click a drum'
+                };
+                
+                this.handleDrumPadActivation = this.handleDrumPadActivation.bind(this);
+                this.handleKeyboardEvent = this.handleKeyboardEvent.bind(this);
             }
 
-            // convert string to valid id string
-            convertStringToValidId = (str = '') => {
-                return str.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\\s' '/]/gi, '');
-            }
+            updateDrumInformation = (drumInformation) => {
+                this.setState(() => ({
+                    displayDrumInformation: drumInformation
+                }));
 
-            render() {
-                return (
-                    this.props.drumpads.map((el) => {
-                        return <DrumPad
-                            id={this.convertStringToValidId(el.description)}
-                            boundKey={el.boundKey}
-                            src={el.src}
-                            description={el.description}
-                        />
-                    })
-                )
-            }
-        }
-
-        class DrumMachine extends React.Component {
-            constructor(props) {
-                super(props);
+                console.log(this.state);
+            };
+            
+            handleDrumPadActivation = (boundKey) => {
+                console.log(boundKey);
+                try {
+                    document.getElementById(boundKey).play();
+                    try {
+                        this.updateDrumInformation(
+                            this.props.drumpads.find((drumpad) => {
+                                return drumpad.boundKey == boundKey;
+                            }).description
+                        );
+                    } catch (e){
+                        console.log(e);
+                    }
+                } catch (e) {
+                    console.log("Audio element instrument not found: " + boundKey);
+                }
+                
             }
 
             handleKeyboardEvent = (e) => {
-                console.log(e);
+                //console.log(e);
+                let upperCaseKey = e.key.toUpperCase();
+                this.handleDrumPadActivation(upperCaseKey);
             };
 
             componentDidMount = () => {
@@ -140,11 +141,43 @@
                 document.removeEventListener('keydown', this.handleKeyboardEvent)
             }
 
+            // convert string to valid id string
+            convertStringToValidId = (str = '') => {
+                return str.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\\s' '/]/gi, '');
+            }
+
             render() {
                 return (
+                <div className="d-flex justify-content-center align-items-center">
                     <div className="d-flex justify-content-center align-items-center">
-                        <DrumPadContainer drumpads={this.props.drumpads} />
-                        <DisplayContainer />
+                        {this.props.drumpads.map((el, index) => {
+                            return <DrumPad
+                                key={this.convertStringToValidId(el.description)}
+                                id={this.convertStringToValidId(el.description)}
+                                boundKey={el.boundKey}
+                                src={el.src}
+                                description={el.description}
+                                handleDrumPadActivation={this.handleDrumPadActivation}
+                            />
+                        })}
+                    </div>
+                    <div>
+                        <InformationDisplay text={this.state.displayDrumInformation}/>
+                    </div>
+                </div>
+                )
+            }
+        }
+
+        class DrumMachine extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            render() {
+                return (
+                    <div>
+                        <DrumKitContainer drumpads={this.props.drumpads} />
                     </div>
                 )
             }
