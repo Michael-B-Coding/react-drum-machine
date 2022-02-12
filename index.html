@@ -1,0 +1,171 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>React - Drum Machine</title>
+
+    <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css">
+
+</head>
+
+<body>
+    <div id="drum-machine"></div>
+
+    <script type="text/babel">
+
+        const DRUMPADS = [
+            { boundKey: "Q", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 1" },
+            { boundKey: "W", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 2" },
+            { boundKey: "E", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 3" },
+            { boundKey: "A", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 4" },
+            { boundKey: "S", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 5" },
+            { boundKey: "D", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 6" },
+            { boundKey: "Z", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 7" },
+            { boundKey: "X", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 8" },
+            { boundKey: "C", src: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3", description: "drum 9" }
+        ];
+
+        class Display extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            render() {
+                return (
+                    <p>Display</p>
+                )
+            }
+        }
+
+        class DisplayContainer extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            render() {
+                return (
+                    <div id="display">
+                        <Display />
+                    </div>
+                )
+            }
+        }
+
+        class DrumPad extends React.Component {
+            constructor(props) {
+                super(props);
+                this.handleDrumPadActivation = this.handleDrumPadActivation.bind(this);
+            }
+
+            handleDrumPadActivation = (e) => {
+                document.getElementById(this.props.boundKey).play();
+            }
+
+            componentDidMount = () => {
+
+            }
+
+            // standardize the width and height
+            style = {
+                width: "2em",
+                height: "2em"
+            }
+
+            render() {
+                return (
+                    <div>
+                        <button
+                            className="drum-pad"
+                            id={this.props.id}
+                            style={this.style}
+                            onClick={this.handleDrumPadActivation}>
+                            {this.props.boundKey}
+
+                            <audio
+                                className="clip"
+                                id={this.props.boundKey}
+                                src={this.props.src}>
+                                Your browser does not support the
+                                <code>audio</code> element.
+                            </audio>
+                        </button>
+                    </div>
+                )
+            }
+        }
+
+        class DrumPadContainer extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            // convert string to valid id string
+            convertStringToValidId = (str = '') => {
+                return str.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\\s' '/]/gi, '');
+            }
+
+            render() {
+                return (
+                    this.props.drumpads.map((el) => {
+                        return <DrumPad
+                            id={this.convertStringToValidId(el.description)}
+                            boundKey={el.boundKey}
+                            src={el.src}
+                            description={el.description}
+                        />
+                    })
+                )
+            }
+        }
+
+        class DrumMachine extends React.Component {
+            constructor(props) {
+                super(props);
+            }
+
+            handleKeyboardEvent = (e) => {
+                console.log(e);
+            };
+
+            componentDidMount = () => {
+                document.addEventListener('keydown', this.handleKeyboardEvent);
+            }
+
+            componentWillUnmount = () => {
+                document.removeEventListener('keydown', this.handleKeyboardEvent)
+            }
+
+            render() {
+                return (
+                    <div className="d-flex justify-content-center align-items-center">
+                        <DrumPadContainer drumpads={this.props.drumpads} />
+                        <DisplayContainer />
+                    </div>
+                )
+            }
+        }
+
+
+
+        ReactDOM.render(
+            <DrumMachine drumpads={DRUMPADS} />,
+            document.getElementById("drum-machine")
+        );
+    </script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"
+        integrity="sha512-M1OTu9xD1JPdXo2cOeJI+Z/f8P6E/pqK9ug3G8PRNLw1caUePewEmpFYKSYh4LEz483qnyB/UTlgX1Q4VCEsKg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+</body>
+
+</html>
